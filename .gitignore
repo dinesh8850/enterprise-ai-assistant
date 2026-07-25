@@ -1,0 +1,29 @@
+# ---- Secrets & environment ----
+.env
+.env.local
+*.env
+
+# ---- Python (backend) ----
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# ---- Node.js / React (frontend) ----
+node_modules/
+dist/
+build/
+.next/
+
+# ---- Docker ----
+*.log
+
+# ---- OS / Editor junk ----
+.DS_Store
+.vscode/
+.idea/
+*.swp
