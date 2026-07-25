@@ -4,21 +4,23 @@ main.py — Entry point of the FastAPI backend.
 
 from fastapi import FastAPI
 from app.api import chat
+from app.core.config import settings
 
 app = FastAPI(
-    title="Enterprise AI Assistant API",
+    title=settings.app_name,
     description="Backend for the multi-agent enterprise AI assistant",
     version="0.1.0",
 )
 
-# Plug in the chat router. All routes defined in app/api/chat.py
-# now become part of this app, live at their full paths (/chat/).
 app.include_router(chat.router)
 
 
 @app.get("/")
 def read_root():
-    return {"message": "Enterprise AI Assistant backend is running"}
+    return {
+        "message": f"{settings.app_name} is running",
+        "environment": settings.environment,
+    }
 
 
 @app.get("/health")
