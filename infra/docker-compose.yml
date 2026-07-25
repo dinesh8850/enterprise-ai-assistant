@@ -1,0 +1,12 @@
+# docker-compose.yml
+# This file defines every "service" (container) our app needs, and how they connect.
+# Run with: docker compose -f infra/docker-compose.yml up
+
+services:
+  # Services (backend, frontend, postgres, neo4j, qdrant, redis)
+  # will be added here one at a time, in later steps,
+  # as we build and understand each piece.
+
+networks:
+  default:
+    name: enterprise-ai-network
