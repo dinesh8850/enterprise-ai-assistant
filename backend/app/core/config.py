@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.0-flash"
 
+    # --- Neo4j (graph database, used starting Step 9's Graph Agent) ---
+    neo4j_uri: str = "bolt://localhost:7687"
+    neo4j_user: str = "neo4j"
+    neo4j_password: str = "enterprise_ai_password"
+
+
     # env_file=".env" is a RELATIVE path — it's resolved against whatever
     # folder you run the command from (your terminal's working directory),
     # NOT against where this config.py file lives on disk.
