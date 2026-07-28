@@ -27,6 +27,12 @@ class Settings(BaseSettings):
     neo4j_user: str = "neo4j"
     neo4j_password: str = "enterprise_ai_password"
 
+    # --- Qdrant (vector database, used starting Step 6) ---
+    qdrant_url: str = "http://localhost:6333"
+    embedding_model: str = "gemini-embedding-001"
+    embedding_dimensions: int = 768
+
+
 
     # env_file=".env" is a RELATIVE path — it's resolved against whatever
     # folder you run the command from (your terminal's working directory),
