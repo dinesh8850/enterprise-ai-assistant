@@ -5,7 +5,7 @@ main.py — Entry point of the FastAPI backend.
 import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from app.api import chat, documents
+from app.api import chat, documents, ask
 from app.core.config import settings
 from app.models.errors import ErrorResponse
 
@@ -21,6 +21,7 @@ app = FastAPI(
 
 app.include_router(chat.router)
 app.include_router(documents.router)
+app.include_router(ask.router)
 
 
 # A global exception handler: catches ANY exception not already handled
