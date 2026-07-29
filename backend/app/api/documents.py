@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.db.repository import create_document, update_document_status
 from app.etl.extract import extract_text
+from app.etl.transform import chunk_text
+from app.etl.load import load_chunks_to_qdrant
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -38,8 +40,16 @@ async def upload_document(file: UploadFile = File(...), db: Session = Depends(ge
         update_document_status(db, document.id, status="failed")
         raise HTTPException(status_code=500, detail="Failed to extract text from file")
 
-    # For now, just confirm extraction worked -- chunking/embedding/storing
-    # (the rest of ETL) gets built in Task 7.3.
+    # Transform: split the extracted text into overlapping chunks.
+    chunks = chunk_text(text)
+
+    # Load: embed each chunk and store it in Qdrant, tagged with this document.
+    try:
+        stored_count = load_chunks_to_qdrant(chunks, document_id=str(document.id), filename=document.filename)
+    except Exception:
+        update_document_status(db, document.id, status="failed")
+        raise HTTPException(status_code=500, detail="Failed to embed and store document chunks")
+
     update_document_status(db, document.id, status="processed")
 
     return {
@@ -47,5 +57,7 @@ async def upload_document(file: UploadFile = File(...), db: Session = Depends(ge
         "filename": document.filename,
         "status": "processed",
         "extracted_characters": len(text),
-        "preview": text[:200],   # just the first 200 characters, so we can eyeball it worked
+        "chunks_created": len(chunks),
+        "chunks_stored_in_qdrant": stored_count,
+        "preview": text[:200],
     }
