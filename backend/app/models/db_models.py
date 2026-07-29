@@ -70,7 +70,7 @@ class Document(Base):
     __tablename__ = "documents"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=new_uuid)
-    uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)  # nullable until Step 12 (auth) exists
     filename = Column(String, nullable=False)
     file_type = Column(String, nullable=False)
     status = Column(String, nullable=False, default="pending")

@@ -11,3 +11,15 @@ engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+
+def get_db():
+    """
+    FastAPI dependency: provides a database session for one request,
+    and guarantees it's closed afterward, even if an error occurs.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
