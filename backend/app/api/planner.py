@@ -6,6 +6,7 @@ question-answering entry point for the whole system.
 from fastapi import APIRouter
 from pydantic import BaseModel
 from app.agents.graph_workflow import app_graph
+from app.core.config import settings
 
 router = APIRouter(prefix="/query", tags=["planner"])
 
@@ -22,6 +23,13 @@ class QueryResponse(BaseModel):
 
 @router.post("/")
 def query(request: QueryRequest):
+    if settings.mock_mode:
+        return QueryResponse(
+            answer=f"[MOCK] This is a fake answer to: {request.question}",
+            routed_to="mock_agent",
+            sources=[{"filename": "mock_document.pdf", "document_id": "mock-id", "score": 0.99}],
+        )
+
     result = app_graph.invoke({
         "question": request.question,
         "chosen_agent": "",

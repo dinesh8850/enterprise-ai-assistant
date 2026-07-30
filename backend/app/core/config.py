@@ -11,6 +11,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    mock_mode: bool = False
+    gemini_model_fallbacks: str = "gemini-3.5-flash,gemini-2.5-flash,gemini-2.5-flash-lite"
     # --- App metadata ---
     app_name: str = "Enterprise AI Assistant API"
     environment: str = "development"   # "development" | "staging" | "production"
