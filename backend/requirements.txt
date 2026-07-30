@@ -9,3 +9,4 @@ qdrant-client==1.12.1
 google-genai==0.3.0
 pypdf==5.1.0
 python-multipart==0.0.17
+langgraph==0.2.53
