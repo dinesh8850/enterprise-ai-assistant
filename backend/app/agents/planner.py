@@ -6,13 +6,11 @@ This is a preview of real orchestration -- Step 10 will formalize
 this flow using LangGraph, but the core routing idea is the same.
 """
 
-from google import genai
+from app.core.llm_client import call_gemini
 from app.core.config import settings
 from app.agents.sql_agent import sql_agent
 from app.agents.document_agent import document_agent
 from app.agents.graph_agent import graph_agent
-
-_client = genai.Client(api_key=settings.gemini_api_key)
 
 AGENT_DESCRIPTIONS = """
 Available specialists:
@@ -45,11 +43,7 @@ Question: "{question}"
 Which ONE specialist should answer this? Reply with ONLY one of these
 exact words: sql_agent, document_agent, graph_agent"""
 
-    response = _client.models.generate_content(
-        model=settings.gemini_model,
-        contents=prompt,
-    )
-    choice = response.text.strip().lower()
+    choice = call_gemini(prompt).strip().lower()
 
     # Defensive check: make sure the model actually picked a real agent name.
     if choice not in AGENTS:

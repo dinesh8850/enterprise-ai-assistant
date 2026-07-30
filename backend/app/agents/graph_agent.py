@@ -5,11 +5,9 @@ Same safe pattern as sql_agent.py: generate a query (Cypher instead
 of SQL), validate it's read-only, execute it, summarize the results.
 """
 
-from google import genai
+from app.core.llm_client import call_gemini
 from app.core.config import settings
 from app.db.graph import driver
-
-_client = genai.Client(api_key=settings.gemini_api_key)
 
 GRAPH_SCHEMA_DESCRIPTION = """
 Node types:
@@ -30,11 +28,7 @@ Write ONE Cypher query that answers this question:
 
 Reply with ONLY the Cypher query, no explanation, no markdown formatting."""
 
-    response = _client.models.generate_content(
-        model=settings.gemini_model,
-        contents=prompt,
-    )
-    cypher = response.text.strip()
+    cypher = call_gemini(prompt).strip()
     cypher = cypher.replace("```cypher", "").replace("```", "").strip()
     return cypher
 
@@ -80,14 +74,11 @@ Query results: {records}
 
 Answer the question in one or two clear sentences, based on these results."""
 
-    response = _client.models.generate_content(
-        model=settings.gemini_model,
-        contents=summary_prompt,
-    )
+    answer_text = call_gemini(summary_prompt).strip()
 
     return {
         "agent_name": "graph_agent",
-        "answer": response.text.strip(),
+        "answer": answer_text,
         "sources": records,
         "cypher_query": cypher,
         "blocked": False,

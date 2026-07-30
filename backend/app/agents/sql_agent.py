@@ -6,12 +6,10 @@ query (given our schema), validate that it's actually read-only,
 then execute it and summarize the results in plain English.
 """
 
-from google import genai
+from app.core.llm_client import call_gemini
 from app.core.config import settings
 from app.db.session import SessionLocal
 from sqlalchemy import text
-
-_client = genai.Client(api_key=settings.gemini_api_key)
 
 # A plain-English description of our schema, so the model knows
 # what it's allowed to query. Kept intentionally minimal and safe --
@@ -42,11 +40,7 @@ Write ONE SQL SELECT query (Postgres syntax) that answers this question:
 
 Reply with ONLY the SQL query, no explanation, no markdown formatting."""
 
-    response = _client.models.generate_content(
-        model=settings.gemini_model,
-        contents=prompt,
-    )
-    sql = response.text.strip()
+    sql = call_gemini(prompt).strip()
     # Strip markdown code fences if the model added them despite instructions.
     sql = sql.replace("```sql", "").replace("```", "").strip()
     return sql
@@ -102,14 +96,11 @@ Query results: {rows}
 
 Answer the question in one or two clear sentences, based on these results."""
 
-    response = _client.models.generate_content(
-        model=settings.gemini_model,
-        contents=summary_prompt,
-    )
+    answer_text = call_gemini(summary_prompt).strip()
 
     return {
         "agent_name": "sql_agent",
-        "answer": response.text.strip(),
+        "answer": answer_text,
         "sources": rows,
         "sql_query": sql,
         "blocked": False,
