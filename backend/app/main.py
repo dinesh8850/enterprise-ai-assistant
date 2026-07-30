@@ -4,6 +4,7 @@ main.py — Entry point of the FastAPI backend.
 
 import logging
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.api import chat, documents, ask, planner
 from app.core.config import settings
@@ -17,6 +18,14 @@ app = FastAPI(
     title=settings.app_name,
     description="Backend for the multi-agent enterprise AI assistant",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],   # our React dev server's origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(chat.router)
