@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 // useEffect lets a component run code in response to it appearing on
 // screen (or specific values changing) -- here, we fetch documents
 // once when the Dashboard first mounts.
-function DashboardPage({ apiBaseUrl }) {
+function DashboardPage({ apiBaseUrl, token }) {
   const [documents, setDocuments] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -11,7 +11,9 @@ function DashboardPage({ apiBaseUrl }) {
   useEffect(() => {
     async function loadDocuments() {
       try {
-        const response = await fetch(`${apiBaseUrl}/documents/`)
+        const response = await fetch(`${apiBaseUrl}/documents/`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        })
         if (!response.ok) {
           setError(`Failed to load documents (${response.status})`)
           return
@@ -25,7 +27,7 @@ function DashboardPage({ apiBaseUrl }) {
       }
     }
     loadDocuments()
-  }, [apiBaseUrl])   // re-run only if apiBaseUrl ever changes
+  }, [apiBaseUrl, token])   // re-run only if apiBaseUrl ever changes
 
   const processedCount = documents.filter((d) => d.status === 'processed').length
   const failedCount = documents.filter((d) => d.status === 'failed').length
