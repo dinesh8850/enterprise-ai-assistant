@@ -3,10 +3,12 @@ planner.py (router) — Exposes our LangGraph workflow as the main
 question-answering entry point for the whole system.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from app.agents.graph_workflow import app_graph
 from app.core.config import settings
+from app.core.deps import get_current_user
+from app.models.db_models import User
 
 router = APIRouter(prefix="/query", tags=["planner"])
 
@@ -22,7 +24,7 @@ class QueryResponse(BaseModel):
 
 
 @router.post("/")
-def query(request: QueryRequest):
+def query(request: QueryRequest, current_user: User = Depends(get_current_user)):
     if settings.mock_mode:
         return QueryResponse(
             answer=f"[MOCK] This is a fake answer to: {request.question}",

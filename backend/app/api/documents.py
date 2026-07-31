@@ -10,6 +10,8 @@ from app.models.db_models import Document
 from app.etl.extract import extract_text
 from app.etl.transform import chunk_text
 from app.etl.load import load_chunks_to_qdrant
+from app.core.deps import get_current_user
+from app.models.db_models import User
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -18,7 +20,7 @@ SUPPORTED_EXTENSIONS = {"pdf": "pdf"}
 
 
 @router.post("/upload")
-async def upload_document(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_document(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Figure out the file type from its extension.
     extension = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
     if extension not in SUPPORTED_EXTENSIONS:
@@ -31,7 +33,7 @@ async def upload_document(file: UploadFile = File(...), db: Session = Depends(ge
     # Save metadata in Postgres first, with status "pending".
     # NOTE: uploaded_by is hardcoded to None for now -- real user
     # association comes once authentication exists, in Step 12.
-    document = create_document(db, filename=file.filename, file_type=file_type, uploaded_by=None)
+    document = create_document(db, filename=file.filename, file_type=file_type, uploaded_by=current_user.id)
 
     # Read the actual file bytes and extract text (Extract phase of ETL).
     file_bytes = await file.read()
