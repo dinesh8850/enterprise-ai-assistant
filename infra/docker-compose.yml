@@ -3,6 +3,31 @@
 # Run with: docker compose -f infra/docker-compose.yml up
 
 services:
+  backend:
+    build: ../backend
+    container_name: enterprise-ai-backend
+    restart: unless-stopped
+    env_file:
+      - ../backend/.env.docker
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+
+  frontend:
+    build: ../frontend
+    container_name: enterprise-ai-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
   qdrant:
     image: qdrant/qdrant:v1.12.4
     container_name: enterprise-ai-qdrant
