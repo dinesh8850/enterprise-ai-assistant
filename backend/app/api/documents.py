@@ -6,6 +6,7 @@ from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.db.repository import create_document, update_document_status
+from app.models.db_models import Document
 from app.etl.extract import extract_text
 from app.etl.transform import chunk_text
 from app.etl.load import load_chunks_to_qdrant
@@ -61,3 +62,19 @@ async def upload_document(file: UploadFile = File(...), db: Session = Depends(ge
         "chunks_stored_in_qdrant": stored_count,
         "preview": text[:200],
     }
+
+
+@router.get("/")
+def list_documents(db: Session = Depends(get_db)):
+    """Returns metadata for every uploaded document -- powers the dashboard."""
+    documents = db.query(Document).order_by(Document.created_at.desc()).all()
+    return [
+        {
+            "id": str(d.id),
+            "filename": d.filename,
+            "file_type": d.file_type,
+            "status": d.status,
+            "created_at": d.created_at.isoformat(),
+        }
+        for d in documents
+    ]

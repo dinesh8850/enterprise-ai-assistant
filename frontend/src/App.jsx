@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import UploadPage from './UploadPage'
+import DashboardPage from './DashboardPage'
 
 // The backend's base URL. In a real deployment this would come from
 // an environment variable -- we'll hardcode it for now since we're
@@ -71,11 +72,14 @@ function App() {
         <nav className="app-nav">
           <button className={activePage === 'chat' ? 'active' : ''} onClick={() => setActivePage('chat')}>Chat</button>
           <button className={activePage === 'upload' ? 'active' : ''} onClick={() => setActivePage('upload')}>Upload</button>
+          <button className={activePage === 'dashboard' ? 'active' : ''} onClick={() => setActivePage('dashboard')}>Dashboard</button>
         </nav>
       </header>
 
       {activePage === 'upload' ? (
         <UploadPage apiBaseUrl={API_BASE_URL} />
+      ) : activePage === 'dashboard' ? (
+        <DashboardPage apiBaseUrl={API_BASE_URL} />
       ) : (
       <main className="chat-container">
       <div className="messages">

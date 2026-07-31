@@ -110,3 +110,15 @@
   background: #f0f0f0;
   border-radius: 6px;
 }
+
+.dashboard-container { max-width: 700px; margin: 40px auto; font-family: sans-serif; }
+.stats-row { display: flex; gap: 16px; margin: 20px 0; }
+.stat-card { flex: 1; padding: 16px; background: #f0f0f0; border-radius: 8px; text-align: center; }
+.stat-number { font-size: 28px; font-weight: bold; }
+.stat-label { font-size: 13px; color: #666; }
+.doc-table { width: 100%; border-collapse: collapse; }
+.doc-table th, .doc-table td { text-align: left; padding: 8px; border-bottom: 1px solid #eee; }
+.badge { padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+.badge-processed { background: #dff5e1; color: #2a7a3b; }
+.badge-failed { background: #fde8e8; color: #a33; }
+.badge-pending { background: #fff4d6; color: #8a6d00; }
