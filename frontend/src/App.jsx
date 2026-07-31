@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import UploadPage from './UploadPage'
 import DashboardPage from './DashboardPage'
+import AuthPage from './AuthPage'
 
 // The backend's base URL. In a real deployment this would come from
 // an environment variable -- we'll hardcode it for now since we're
@@ -20,6 +21,17 @@ function App() {
   // lets us show a "thinking..." indicator and disable the send button.
   const [isLoading, setIsLoading] = useState(false)
   const [activePage, setActivePage] = useState('chat')
+  const [token, setToken] = useState(localStorage.getItem('token'))
+
+  function handleLogin(newToken) {
+    localStorage.setItem('token', newToken)
+    setToken(newToken)
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('token')
+    setToken(null)
+  }
 
   async function handleSend() {
     const question = input.trim()
@@ -33,7 +45,10 @@ function App() {
     try {
       const response = await fetch(`${API_BASE_URL}/query/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ question }),
       })
 
@@ -65,6 +80,17 @@ function App() {
     }
   }
 
+  if (!token) {
+    return (
+      <div className="app-shell">
+        <header className="app-header">
+          <span className="app-title">Enterprise AI Assistant</span>
+        </header>
+        <AuthPage apiBaseUrl={API_BASE_URL} onLogin={handleLogin} />
+      </div>
+    )
+  }
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -73,13 +99,14 @@ function App() {
           <button className={activePage === 'chat' ? 'active' : ''} onClick={() => setActivePage('chat')}>Chat</button>
           <button className={activePage === 'upload' ? 'active' : ''} onClick={() => setActivePage('upload')}>Upload</button>
           <button className={activePage === 'dashboard' ? 'active' : ''} onClick={() => setActivePage('dashboard')}>Dashboard</button>
+          <button onClick={handleLogout}>Logout</button>
         </nav>
       </header>
 
       {activePage === 'upload' ? (
-        <UploadPage apiBaseUrl={API_BASE_URL} />
+        <UploadPage apiBaseUrl={API_BASE_URL} token={token} />
       ) : activePage === 'dashboard' ? (
-        <DashboardPage apiBaseUrl={API_BASE_URL} />
+        <DashboardPage apiBaseUrl={API_BASE_URL} token={token} />
       ) : (
       <main className="chat-container">
       <div className="messages">

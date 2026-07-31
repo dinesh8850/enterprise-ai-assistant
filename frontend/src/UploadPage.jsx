@@ -3,7 +3,7 @@ import { useState } from 'react'
 // apiBaseUrl is passed in as a prop from App.jsx -- this is how
 // a child component receives data from its parent (recall Task 11.1's
 // "props" vocabulary).
-function UploadPage({ apiBaseUrl }) {
+function UploadPage({ apiBaseUrl, token }) {
   const [selectedFile, setSelectedFile] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
   const [result, setResult] = useState(null)
@@ -31,6 +31,9 @@ function UploadPage({ apiBaseUrl }) {
     try {
       const response = await fetch(`${apiBaseUrl}/documents/upload`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
         // Note: no 'Content-Type' header here -- the browser sets it
         // automatically for FormData, including the required boundary.
