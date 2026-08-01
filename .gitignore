@@ -28,3 +28,4 @@ build/
 .idea/
 *.swp
 backend/.env.docker
+backend/.env.docker
