@@ -1,10 +1,9 @@
 # ci.yml — Runs automatically on every push and pull request.
-# Verifies the backend installs correctly, the frontend builds
-# correctly, and both Docker images build successfully.
+# Verifies the backend installs correctly and passes real tests,
+# the frontend builds correctly, and both Docker images build successfully.
 
 name: CI
 
-# Defines WHEN this workflow runs.
 on:
   push:
     branches: [main]
@@ -12,9 +11,29 @@ on:
     branches: [main]
 
 jobs:
-  backend-check:
-    name: Backend - install & import check
+  backend-test:
+    name: Backend - install & run tests
     runs-on: ubuntu-latest
+
+    # A temporary Postgres container, available only to this job,
+    # for the duration of this job -- this is what our integration
+    # tests (Task 17.3) need to actually run in CI.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: enterprise_ai_user
+          POSTGRES_PASSWORD: enterprise_ai_password
+          POSTGRES_DB: enterprise_ai_test
+        ports:
+          - 5432:5432
+        # Waits for Postgres to actually be ready before the job
+        # continues -- same idea as our docker-compose healthchecks.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
       - name: Check out code
@@ -29,13 +48,14 @@ jobs:
         working-directory: backend
         run: pip install -r requirements.txt
 
-      - name: Confirm the app imports without errors
+      - name: Run tests
         working-directory: backend
         env:
-          DATABASE_URL: "postgresql://user:password@localhost:5432/testdb"
+          DATABASE_URL: "postgresql://enterprise_ai_user:enterprise_ai_password@localhost:5432/enterprise_ai_test"
           GEMINI_API_KEY: "dummy-key-for-ci"
           JWT_SECRET_KEY: "dummy-secret-for-ci"
-        run: python -c "import app.main"
+          MOCK_MODE: "true"
+        run: pytest tests/ -v
 
   frontend-check:
     name: Frontend - install & build check
