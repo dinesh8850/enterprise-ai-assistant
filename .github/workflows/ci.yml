@@ -1,0 +1,73 @@
+# ci.yml — Runs automatically on every push and pull request.
+# Verifies the backend installs correctly, the frontend builds
+# correctly, and both Docker images build successfully.
+
+name: CI
+
+# Defines WHEN this workflow runs.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-check:
+    name: Backend - install & import check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+
+      - name: Confirm the app imports without errors
+        working-directory: backend
+        env:
+          DATABASE_URL: "postgresql://user:password@localhost:5432/testdb"
+          GEMINI_API_KEY: "dummy-key-for-ci"
+          JWT_SECRET_KEY: "dummy-secret-for-ci"
+        run: python -c "import app.main"
+
+  frontend-check:
+    name: Frontend - install & build check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Build the frontend
+        working-directory: frontend
+        run: npm run build
+
+  docker-build-check:
+    name: Docker images build successfully
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t enterprise-ai-backend ./backend
+
+      - name: Build frontend image
+        run: docker build -t enterprise-ai-frontend ./frontend
