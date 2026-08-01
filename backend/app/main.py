@@ -6,7 +6,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.api import chat, documents, ask, planner
+from app.api import chat, documents, ask, planner, auth
 from app.core.config import settings
 from app.models.errors import ErrorResponse
 
@@ -22,7 +22,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],   # our React dev server's origin
+    allow_origins=settings.cors_origins.split(","),   # comma-separated list, supports dev + prod origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,6 +32,7 @@ app.include_router(chat.router)
 app.include_router(documents.router)
 app.include_router(ask.router)
 app.include_router(planner.router)
+app.include_router(auth.router)
 
 
 # A global exception handler: catches ANY exception not already handled

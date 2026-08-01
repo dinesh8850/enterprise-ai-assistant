@@ -11,6 +11,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    cors_origins: str = "http://localhost:5173"
+    jwt_secret_key: str = "change-this-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 60
     mock_mode: bool = False
     gemini_model_fallbacks: str = "gemini-3.5-flash,gemini-2.5-flash,gemini-2.5-flash-lite"
     # --- App metadata ---
