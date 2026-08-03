@@ -7,7 +7,7 @@ import AuthPage from './AuthPage'
 // The backend's base URL. In a real deployment this would come from
 // an environment variable -- we'll hardcode it for now since we're
 // running everything locally.
-const API_BASE_URL = 'http://127.0.0.1:8000'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
 
 function App() {
   // messages: the full conversation history shown on screen.
