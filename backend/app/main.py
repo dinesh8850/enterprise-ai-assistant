@@ -65,3 +65,11 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.get("/debug-cors")
+def debug_cors():
+    return {
+        "cors_origins_raw": settings.cors_origins,
+        "cors_origins_parsed": settings.cors_origins.split(","),
+    }
