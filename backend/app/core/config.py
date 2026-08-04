@@ -11,6 +11,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    redis_url: str = "redis://localhost:6379"
+    cache_ttl_seconds: int = 3600
     cors_origins: str = "http://localhost:5173"
     jwt_secret_key: str = "change-this-in-production"
     jwt_algorithm: str = "HS256"

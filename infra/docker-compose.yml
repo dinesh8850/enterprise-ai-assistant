@@ -3,6 +3,20 @@
 # Run with: docker compose -f infra/docker-compose.yml up
 
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: enterprise-ai-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     build: ../backend
     container_name: enterprise-ai-backend
@@ -81,6 +95,7 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
   neo4j_data:
   neo4j_logs:
   qdrant_data:                        # Docker manages this named volume's actual location for us
