@@ -2,6 +2,7 @@
 documents.py (router) — Handles file uploads and kicks off the ETL pipeline.
 """
 
+import logging
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import get_db
@@ -14,6 +15,8 @@ from app.core.deps import get_current_user
 from app.models.db_models import User
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+
+logger = logging.getLogger("app")
 
 # Map uploaded filename extensions to our internal file_type labels.
 SUPPORTED_EXTENSIONS = {"pdf": "pdf"}
@@ -50,6 +53,7 @@ async def upload_document(file: UploadFile = File(...), db: Session = Depends(ge
     try:
         stored_count = load_chunks_to_qdrant(chunks, document_id=str(document.id), filename=document.filename)
     except Exception:
+        logger.exception("Failed to embed and store document chunks")
         update_document_status(db, document.id, status="failed")
         raise HTTPException(status_code=500, detail="Failed to embed and store document chunks")
 
