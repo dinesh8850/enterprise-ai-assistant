@@ -35,6 +35,7 @@ class Settings(BaseSettings):
 
     # --- Qdrant (vector database, used starting Step 6) ---
     qdrant_url: str = "http://localhost:6333"
+    qdrant_api_key: str = ""
     embedding_model: str = "gemini-embedding-001"
     embedding_dimensions: int = 768
 
