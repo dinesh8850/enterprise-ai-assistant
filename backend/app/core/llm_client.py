@@ -11,7 +11,7 @@ from google import genai
 from google.genai import types
 from app.core.config import settings
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
-from google.genai.errors import ClientError
+from google.genai.errors import ClientError, ServerError
 
 _client = genai.Client(api_key=settings.gemini_api_key)
 
@@ -19,7 +19,7 @@ MODEL_CHAIN = [m.strip() for m in settings.gemini_model_fallbacks.split(",") if 
 
 
 @retry(
-    retry=retry_if_exception_type(ClientError),
+    retry=retry_if_exception_type((ClientError, ServerError)),
     wait=wait_exponential(multiplier=2, min=2, max=20),
     stop=stop_after_attempt(2),   # fewer retries PER MODEL, since we have several models to try
 )
@@ -39,7 +39,7 @@ def call_gemini(prompt: str, system_instruction: str | None = None) -> str:
     for model in MODEL_CHAIN:
         try:
             return _call_one_model(model, prompt, system_instruction)
-        except ClientError as e:
+        except (ClientError, ServerError) as e:
             print(f"[llm_client] {model} failed ({e}), trying next model in chain...")
             last_error = e
             continue
