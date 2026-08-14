@@ -11,7 +11,7 @@ from google import genai
 from google.genai import types
 from app.core.config import settings
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
-from google.genai.errors import ClientError, ServerError
+from google.genai.errors import ClientError, ServerError, ServerError
 
 _client = genai.Client(api_key=settings.gemini_api_key)
 
