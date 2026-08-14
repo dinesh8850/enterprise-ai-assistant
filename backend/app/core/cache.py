@@ -11,7 +11,11 @@ import json
 import redis
 from app.core.config import settings
 
-_redis_client = redis.from_url(settings.redis_url, decode_responses=True)
+_redis_client = redis.from_url(
+    settings.redis_url,
+    decode_responses=True,
+    socket_connect_timeout=2,
+)
 
 
 def _cache_key(question: str) -> str:
@@ -29,9 +33,9 @@ def get_cached_response(question: str) -> dict | None:
     try:
         cached = _redis_client.get(_cache_key(question))
         return json.loads(cached) if cached else None
-    except redis.RedisError:
-        # If Redis itself is down, fail gracefully -- treat it as a
-        # cache miss rather than crashing the whole request.
+    except Exception:
+        # ANY failure talking to Redis (unreachable, misconfigured, etc.)
+        # should degrade to a cache miss, never crash the request.
         return None
 
 
@@ -43,5 +47,5 @@ def set_cached_response(question: str, response: dict) -> None:
             settings.cache_ttl_seconds,
             json.dumps(response),
         )
-    except redis.RedisError:
+    except Exception:
         pass  # Caching is an optimization, not a hard requirement -- never let a cache failure break the actual response.
