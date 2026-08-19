@@ -28,6 +28,8 @@ class Settings(BaseSettings):
 
     # --- AI provider: Google Gemini (used starting Step 9) ---
     gemini_api_key: str = ""
+    groq_api_key: str = ""
+    groq_model: str = "openai/gpt-oss-120b"
     gemini_model: str = "gemini-2.0-flash"
 
     # --- Neo4j (graph database, used starting Step 9's Graph Agent) ---
@@ -38,8 +40,8 @@ class Settings(BaseSettings):
     # --- Qdrant (vector database, used starting Step 6) ---
     qdrant_url: str = "http://localhost:6333"
     qdrant_api_key: str = ""
-    embedding_model: str = "gemini-embedding-001"
-    embedding_dimensions: int = 768
+    embedding_model: str = "all-MiniLM-L6-v2"
+    embedding_dimensions: int = 384
 
 
 

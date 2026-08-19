@@ -1,20 +1,15 @@
 """
-embeddings.py — Wraps Google's embedding model behind one simple function.
+embeddings.py — Generates embeddings LOCALLY using sentence-transformers.
+No API calls, no rate limits, no quotas -- runs directly in this process.
 """
 
-from google import genai
-from google.genai import types
+from sentence_transformers import SentenceTransformer
 from app.core.config import settings
 
-_client = genai.Client(api_key=settings.gemini_api_key)
+# Loaded once at import time and reused for every call.
+_model = SentenceTransformer(settings.embedding_model)
 
 
 def embed_text(text: str) -> list[float]:
-    response = _client.models.embed_content(
-        model=settings.embedding_model,
-        contents=text,
-        config=types.EmbedContentConfig(
-            output_dimensionality=settings.embedding_dimensions
-        ),
-    )
-    return response.embeddings[0].values
+    vector = _model.encode(text, normalize_embeddings=True)
+    return vector.tolist()

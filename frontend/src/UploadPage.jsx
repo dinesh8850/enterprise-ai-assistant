@@ -47,7 +47,7 @@ function UploadPage({ apiBaseUrl, token }) {
 
       const data = await response.json()
       setResult(data)
-    } catch (err) {
+    } catch {
       setError('Could not reach the server. Is the backend running?')
     } finally {
       setIsUploading(false)

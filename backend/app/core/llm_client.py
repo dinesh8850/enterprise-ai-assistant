@@ -1,47 +1,35 @@
 """
-llm_client.py — The ONE place that actually calls Gemini's generate_content.
+llm_client.py — The ONE place that actually calls the LLM (Groq).
 
-Tries multiple models in order (from settings.gemini_model_fallbacks),
-falling back to the next one if the current model's quota is exhausted.
-Each free-tier model has its OWN separate quota, so this genuinely
-multiplies how much we can do today without waiting for a reset.
+Groq's free tier has much higher rate limits than Gemini's free tier,
+and uses an OpenAI-compatible API.
 """
 
-from google import genai
-from google.genai import types
+from groq import Groq
 from app.core.config import settings
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
-from google.genai.errors import ClientError, ServerError, ServerError
 
-_client = genai.Client(api_key=settings.gemini_api_key)
-
-MODEL_CHAIN = [m.strip() for m in settings.gemini_model_fallbacks.split(",") if m.strip()]
+_client = Groq(api_key=settings.groq_api_key)
 
 
 @retry(
-    retry=retry_if_exception_type((ClientError, ServerError)),
-    wait=wait_exponential(multiplier=2, min=2, max=20),
-    stop=stop_after_attempt(2),   # fewer retries PER MODEL, since we have several models to try
+    retry=retry_if_exception_type(Exception),
+    wait=wait_exponential(multiplier=2, min=2, max=30),
+    stop=stop_after_attempt(4),
 )
-def _call_one_model(model: str, prompt: str, system_instruction: str | None) -> str:
-    config = types.GenerateContentConfig(system_instruction=system_instruction) if system_instruction else None
-    response = _client.models.generate_content(model=model, contents=prompt, config=config)
-    return response.text
-
-
 def call_gemini(prompt: str, system_instruction: str | None = None) -> str:
     """
-    Tries each model in MODEL_CHAIN in order. If one is rate-limited or
-    quota-exhausted (ClientError), moves to the next. Raises the last
-    error if every model in the chain fails.
+    Kept the name call_gemini so every agent file (sql_agent, graph_agent,
+    document_agent's generation.py, planner) works unchanged -- only
+    this ONE file needed to change to swap providers.
     """
-    last_error = None
-    for model in MODEL_CHAIN:
-        try:
-            return _call_one_model(model, prompt, system_instruction)
-        except (ClientError, ServerError) as e:
-            print(f"[llm_client] {model} failed ({e}), trying next model in chain...")
-            last_error = e
-            continue
+    messages = []
+    if system_instruction:
+        messages.append({"role": "system", "content": system_instruction})
+    messages.append({"role": "user", "content": prompt})
 
-    raise last_error
+    response = _client.chat.completions.create(
+        model=settings.groq_model,
+        messages=messages,
+    )
+    return response.choices[0].message.content

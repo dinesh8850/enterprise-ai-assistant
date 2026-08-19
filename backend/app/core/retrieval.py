@@ -8,11 +8,8 @@ that was used to store them (Task 6.3/7.3).
 
 from app.db.vector import qdrant_client
 from app.core.embeddings import embed_text
-from google import genai
-from google.genai import types
 from app.core.config import settings
-
-_rerank_client = genai.Client(api_key=settings.gemini_api_key)
+from app.core.llm_client import call_gemini
 
 
 def retrieve_relevant_chunks(question: str, limit: int = 3) -> list[dict]:
@@ -56,12 +53,9 @@ def rerank_chunks(question: str, chunks: list[dict], top_n: int = 3) -> list[dic
             "On a scale of 0 to 10, how directly does this passage answer "
             "the question? Reply with ONLY a number, nothing else."
         )
-        response = _rerank_client.models.generate_content(
-            model=settings.gemini_model,
-            contents=prompt,
-        )
+        response_text = call_gemini(prompt)
         try:
-            relevance_score = float(response.text.strip())
+            relevance_score = float(response_text.strip())
         except (ValueError, AttributeError):
             relevance_score = 0.0
 
